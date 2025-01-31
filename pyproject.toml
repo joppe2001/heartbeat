@@ -5,7 +5,18 @@ description = "Add your description here"
 authors = [
     { name = "Joppe", email = "joppe.montezinos@gmail.com" }
 ]
-dependencies = []
+dependencies = [
+    "numpy>=2.2.2",
+    "pandas>=2.2.3",
+    "pq>=1.9.1",
+    "pyarrow<19.0.0",
+    "notebook>=7.3.2",
+    "seaborn>=0.13.2",
+    "matplotlib>=3.10.0",
+    "jrnl>=4.2",
+    "mads-datasets>=0.3.14",
+    "mltrainer>=0.1.129",
+]
 readme = "README.md"
 requires-python = ">= 3.8"
 
