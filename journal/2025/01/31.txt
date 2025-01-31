@@ -1,0 +1,276 @@
+[2025-01-31 06:19:22 PM] Initialization of the amazing journal feature
+
+[2025-01-31 06:20:50 PM] currently setting up the base of the project, making sure everything is well structured so that the rest of development will be as smooth as can be.
+
+[2025-01-31 06:54:16 PM] walking through all of the data to figure out what were dealing with and what the plan of attack is going to be
+
+[2025-01-31 07:13:46 PM] Data Analysis Findings:
+- Dataset size: 87,554 samples with 187 features + 1 target column
+- Classification task with 5 classes (0-4)
+- Significant class imbalance:
+  * Class 0: 82.77% (Normal)
+  * Class 4: 7.35% (Type 4 Arrhythmia)
+  * Class 2: 6.61% (Type 2 Arrhythmia)
+  * Class 1: 2.54% (Type 1 Arrhythmia)
+  * Class 3: 0.73% (Type 3 Arrhythmia)
+- Each sample appears to be a normalized time series (values between 0-1)
+
+[2025-01-31 07:16:57 PM] prior log was about the training set ofcourse. i was being very blind for a second there
+
+[2025-01-31 07:28:52 PM] Key Challenges Identified:
+1. Severe Class Imbalance:
+   - Need to address 82.77% dominance of normal cases
+   - Class 3 is particularly underrepresented (0.73%)
+   Strategy options:
+   - Oversampling minorities (SMOTE?)
+   - Class weights in loss function
+   - Stratified sampling
+
+2. Time Series Classification:
+   - 187 time steps per sample
+   - Normalized data (good for neural networks)
+   - Need to capture temporal patterns
+
+3. Medical Context:
+   - False negatives more costly than false positives
+   - Need to focus on recall for abnormal classes
+
+[2025-01-31 07:33:07 PM] Planned Next Steps:
+1. Data Preprocessing:
+   - Create train/validation/test split (stratified!)
+   - Implement data augmentation for minority classes
+   - Consider windowing or segmentation techniques
+
+2. Baseline Model:
+   - Start with simple 1D CNN
+   - Implement with class weights
+   - Focus on recall metrics
+
+3. Evaluation Setup:
+   - Implement custom metrics focusing on recall
+   - Set up cross-validation with stratification
+   - Create confusion matrix visualization
+
+[2025-01-31 07:39:54 PM] Initial Research Phase:
+Background:
+- Arrhythmia is an irregular heartbeat pattern
+- We have 5 classes (likely different types of patterns)
+- Time series classification problem
+- Medical context means recall is crucial
+
+Initial Hypotheses:
+1. Due to sequential nature of ECG data:
+   - 1D CNNs might be good at detecting local patterns
+   - Transformers might capture long-range dependencies
+   
+2. Class imbalance challenges:
+   - Using weighted loss functions should help with minority classes
+   - Oversampling might improve minority class detection
+
+Research Questions:
+1. Which architectures are commonly used for ECG classification?
+2. What techniques handle severe class imbalance in medical data?
+
+[2025-01-31 08:06:53 PM] set up most of the base line tests for this project to start monitoring and testing the results for hypothesis
+
+[2025-01-31 08:16:37 PM] Initial Analysis & Hypotheses:
+Data Characteristics:
+- 5 classes of arrhythmia with significant imbalance (82.77% class 0)
+- 187 features (time series data points)
+- 87,554 samples
+
+Hypotheses:
+1. Simple 1D CNN (our baseline) might struggle with:
+   - Class imbalance (even with weights)
+   - Long-range dependencies in ECG signals
+   
+2. Potential Improvements to Test:
+   - Add more conv layers with different kernel sizes
+   - Try attention mechanism for long-range patterns
+   - Data augmentation for minority classes
+   
+Initial Focus:
+- Establish baseline with current CNN
+- Prioritize recall for abnormal classes (medical context)
+
+[2025-01-31 08:20:59 PM] Experiment Plan:
+Phase 1 - Baseline Validation:
+- Run current CNN with different hyperparameters:
+  * Learning rates: [0.001, 0.0001]
+  * Batch sizes: [32, 64, 128]
+  * Number of conv layers: [2, 3, 4]
+
+Phase 2 - Architecture Exploration:
+1. CNN Variants:
+   - ResNet-style connections
+   - Different kernel sizes
+   - Deeper networks
+
+2. Transformer Approach:
+   - Basic transformer
+   - CNN + Attention hybrid
+
+Phase 3 - Data Handling:
+- Oversampling minorities
+- Signal augmentation (noise, time shift)
+- Cross-validation for robust evaluation
+
+[2025-01-31 08:33:39 PM] creating better terminal feedback for the training session
+
+[2025-01-31 08:47:00 PM] Next Experiment Planning:
+Will implement confusion matrix visualization and per-class metrics
+to better understand where the model struggles before making
+architecture modifications.
+
+[2025-01-31 09:06:41 PM] edited the server script for more robust operations. ( might need to look more into this ) server is for mlflow
+
+[2025-01-31 09:10:39 PM] First Baseline Results:
+Training Metrics:
+- Best Average Recall: 0.9310 (93.10%)
+- Early stopping triggered at epoch 20/50
+- Training time: ~9 minutes
+- Dataset split:
+  * Training:   61,287 samples
+  * Validation: 13,133 samples
+  * Test:       13,134 samples
+
+Analysis:
+1. Model Performance:
+   - Surprisingly good baseline performance (>93% avg recall)
+   - Early stopping suggests good convergence
+   - Quick training time indicates efficient architecture
+
+2. Observations vs Initial Hypotheses:
+   + The CNN handled class imbalance better than expected
+   + Weighted loss function seems effective
+   - Need to analyze per-class recall to verify minority class performance
+   
+3. Next Steps:
+   a) Detailed Analysis Needed:
+      - Generate confusion matrix
+      - Calculate per-class precision/recall
+      - Look for patterns in misclassifications
+   
+   b) Potential Improvements:
+      - Try deeper architecture (current model converged quickly)
+      - Experiment with different kernel sizes
+      - Consider data augmentation for minority classes
+      
+4. Questions to Address:
+   - Are we overfitting despite good validation metrics?
+   - How does performance vary across different arrhythmia types?
+   - Could we achieve similar results with a simpler model?
+
+[2025-01-31 09:34:23 PM] [2025-01-31 21:15:00 PM] Understanding Our Metrics:
+Recall Significance in Arrhythmia Detection:
+- Recall = (Correctly Caught Cases) / (Total Actual Cases)
+- For each class, recall tells us: "What percentage of actual cases did we catch?"
+- Example interpretation:
+  * If recall_class_3 = 0.93, we caught 93% of all Type 3 Arrhythmia cases
+  * The remaining 7% were missed diagnoses (false negatives)
+
+Why 93.10% Average Recall is Important:
+1. Medical Impact:
+   - Each percentage point represents real cases
+   - Missing an arrhythmia (false negative) could be life-threatening
+   - Our 93.10% means we're catching most cases, but still missing ~7%
+
+2. Per-Class Analysis Needed:
+   - Current 93.10% is averaged across classes
+   - Need to verify recall for minority classes (especially Class 3: 0.73%)
+   - A high recall on majority class (Normal) might be masking poor performance on critical minority cases
+
+Next Action Items:
+1. Generate per-class recall metrics
+2. Analyze which types of arrhythmia we're missing most
+3. Focus improvements on the most critical misses
+
+[2025-01-31 09:36:00 PM] [2025-01-31 21:35:00 PM] Detailed Baseline Results Analysis:
+Per-Class Performance:
+1. Normal (Class 0):
+   - Recall: 0.95 (caught 95% of normal cases)
+   - Precision: 0.99
+   - Very strong performance on majority class
+
+2. Type 1 Arrhythmia:
+   - Recall: 0.87 (caught 87% of cases)
+   - Precision: 0.52
+   - Good at finding cases but many false positives
+
+3. Type 2 Arrhythmia:
+   - Recall: 0.94 (caught 94% of cases)
+   - Precision: 0.91
+   - Excellent balanced performance
+
+4. Type 3 Arrhythmia (Rarest):
+   - Recall: 0.90 (caught 90% of cases)
+   - Precision: 0.31
+   - High false positive rate but catching most cases
+
+5. Type 4 Arrhythmia:
+   - Recall: 0.99 (caught 99% of cases)
+   - Precision: 0.94
+   - Best performing class overall
+
+Key Insights:
+1. Misclassification Patterns:
+   - Class 0 (Normal): 546 misses despite being majority class
+   - Class 1: 43 misses with low precision (many false positives)
+   - Class 3: Only 10 misses but very low precision (0.31)
+   - Class 4: Exceptional performance (only 5 misses)
+
+2. Trade-offs:
+   + High recall across all classes (0.87-0.99)
+   - Precision varies significantly (0.31-0.99)
+   - Model tends to overpredict minority classes (especially Type 3)
+
+Next Steps Based on Results:
+1. Focus Areas:
+   - Improve precision for Type 3 while maintaining high recall
+   - Reduce false positives in Type 1 classification
+   - Investigate why Type 4 performs so well (potential insights)
+
+2. Architecture Adjustments:
+   - Consider adding features to better distinguish Type 1 and 3
+   - Maybe current model is too powerful (overfitting to minorities)
+   - Try simpler architecture for Type 1 and 3 classification
+
+3. Data Strategies:
+   - Analyze misclassified cases for patterns
+   - Consider separate binary classifiers for problematic classes
+   - Review if data augmentation is needed given high recall
+
+[2025-01-31 09:44:37 PM] Moving to Next Model Architecture:
+Baseline Model Achievement Summary:
+- Strong overall performance (0.93 avg recall)
+- Particularly strong on Class 4 (0.99 recall, 0.94 precision)
+- Areas for improvement: precision on Class 1 (0.52) and Class 3 (0.31)
+
+Next Model: ResNet-Style CNN
+Rationale:
+1. Building on CNN success:
+   - Keep the effective convolution base
+   - Add skip connections for better gradient flow
+   - Deeper architecture while preventing vanishing gradients
+
+2. Expected Improvements:
+   - Better feature hierarchy with deeper layers
+   - Skip connections might help capture both local and broader patterns
+   - Potentially improve precision while maintaining high recall
+
+Architecture Plan:
+- Start with 4 ResNet blocks
+- Each block: Conv1D -> BatchNorm -> ReLU -> Conv1D + Skip Connection
+- Global Average Pooling before classification head
+- Keep weighted loss function (proved effective)
+
+Experiment Configuration:
+- Learning rate: 0.001 (same as baseline)
+- Batch size: 32 (worked well)
+- Early stopping patience: 5 epochs
+- Monitor average recall for consistency
+
+Success Criteria:
+- Maintain >0.90 recall across all classes
+- Improve precision for Classes 1 and 3
+- Keep or improve Class 4's excellent performance

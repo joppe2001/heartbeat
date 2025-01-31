@@ -16,6 +16,9 @@ dependencies = [
     "jrnl>=4.2",
     "mads-datasets>=0.3.14",
     "mltrainer>=0.1.129",
+    "pip>=25.0",
+    "mlflow>=2.20.1",
+    "psutil>=6.1.1",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"
