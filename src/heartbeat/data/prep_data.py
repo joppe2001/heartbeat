@@ -2,10 +2,16 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 import torch
+from pathlib import Path
 
 
 def prepare_data():
-    df = pd.read_parquet('../../../data/heart_big_train.parq')
+    # Get the path relative to this script's location
+    current_file = Path(__file__)
+    data_path = current_file.parent.parent.parent.parent / "data" / "heart_big_train.parq"
+
+    # Convert to absolute path and read the data
+    df = pd.read_parquet(str(data_path.resolve()))
     X = df.drop('target', axis=1).values
     y = df['target'].values
 

@@ -19,6 +19,8 @@ dependencies = [
     "pip>=25.0",
     "mlflow>=2.20.1",
     "psutil>=6.1.1",
+    "ray>=2.41.0",
+    "optuna>=4.2.0",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"
