@@ -1,5 +1,5 @@
 # Arrhythmia Classification using Deep Learning: An Iterative Approach
-[GitHub Repository](https://github.com/joppe2001/heartbeat)
+GitHub Repository: https://github.com/joppe2001/heartbeat
 
 ## 1. Executive Summary
 This project focused on developing a deep learning model for classifying five types of arrhythmia patterns in ECG data. Through iterative experimentation, we evolved from a baseline CNN achieving 93.10% average recall to more sophisticated architectures including an Enhanced CNN and a Dual-Path ResNet with attention mechanism. Key challenges addressed included severe class imbalance (82.77% normal cases) and maintaining high recall for minority classes.
