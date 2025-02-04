@@ -9,7 +9,7 @@ import sys
 import mlflow
 from heartbeat.data.prep_data import prepare_data
 from heartbeat.evaluation.metrics import evaluate_model
-from tunable_cnn import TunableCNN
+from heartbeat.models.cnn.enhanced_cnn import EnhancedCNN
 
 # Add src to path
 src_path = str(Path(__file__).parent.parent.parent)
@@ -35,7 +35,7 @@ def train_cnn(config):
         # Create data loaders
         train_loader = torch.utils.data.DataLoader(
             torch.utils.data.TensorDataset(
-                torch.FloatTensor(X_train),
+                torch.FloatTensor(X_train).unsqueeze(1),  # Add channel dimension
                 torch.LongTensor(y_train)
             ),
             batch_size=int(config["batch_size"]),
@@ -44,14 +44,23 @@ def train_cnn(config):
 
         val_loader = torch.utils.data.DataLoader(
             torch.utils.data.TensorDataset(
-                torch.FloatTensor(X_val),
+                torch.FloatTensor(X_val).unsqueeze(1),  # Add channel dimension
                 torch.LongTensor(y_val)
             ),
             batch_size=int(config["batch_size"])
         )
 
-        # Model setup
-        model = TunableCNN(config).to(device)
+        # Model setup with enhanced CNN
+        model_config = {
+            "channels_1": config["channels_1"],
+            "channels_2": config["channels_2"],
+            "kernel_1": config["kernel_size_1"],
+            "kernel_2": config["kernel_size_2"],
+            "fc_size": config["fc_size"],
+            "dropout": config["dropout_rate"]
+        }
+
+        model = EnhancedCNN(model_config).to(device)
         optimizer = torch.optim.Adam(
             model.parameters(),
             lr=config["learning_rate"],
@@ -109,41 +118,33 @@ def main():
     # Initialize Ray
     ray.init()
 
-    # Define search space
+    # Define search space for enhanced CNN
     config = {
-        "num_conv_layers": tune.choice([2, 3, 4]),
         "channels_1": tune.choice([16, 32, 64]),
-        "channels_2": tune.choice([32, 64, 128]),
-        "channels_3": tune.choice([64, 128, 256]),
-        "channels_4": tune.choice([128, 256, 512]),
+        "channels_2": tune.choice([64, 128, 256]),
         "kernel_size_1": tune.choice([3, 5, 7]),
         "kernel_size_2": tune.choice([3, 5, 7]),
-        "kernel_size_3": tune.choice([3, 5, 7]),
-        "kernel_size_4": tune.choice([3, 5, 7]),
-        "fc_size": tune.choice([64, 128, 256]),
+        "fc_size": tune.choice([128, 256, 512]),
         "dropout_rate": tune.uniform(0.1, 0.5),
-        "learning_rate": tune.loguniform(1e-4, 1e-3),
+        "learning_rate": tune.loguniform(1e-4, 1e-2),
         "weight_decay": tune.loguniform(1e-5, 1e-3),
         "batch_size": tune.choice([32, 64, 128])
     }
 
     # Setup MLflow tracking
     mlflow.set_tracking_uri("http://127.0.0.1:5000")
-    mlflow.set_experiment("tune_cnn_experiment")
+    mlflow.set_experiment("tune_enhanced_cnn_experiment")
 
     # Start the parent run for hyperparameter tuning
     with mlflow.start_run(run_name="hyperparameter_tuning") as parent_run:
         # Log the search space configuration
         mlflow.log_params({
-            "search_space_num_conv_layers": "2, 3, 4",
             "search_space_channels_1": "16, 32, 64",
-            "search_space_channels_2": "32, 64, 128",
-            "search_space_channels_3": "64, 128, 256",
-            "search_space_channels_4": "128, 256, 512",
+            "search_space_channels_2": "64, 128, 256",
             "search_space_kernel_sizes": "3, 5, 7",
-            "search_space_fc_size": "64, 128, 256",
+            "search_space_fc_size": "128, 256, 512",
             "search_space_dropout_rate": "0.1-0.5",
-            "search_space_learning_rate": "1e-4-1e-3",
+            "search_space_learning_rate": "1e-4-1e-2",
             "search_space_weight_decay": "1e-5-1e-3",
             "search_space_batch_size": "32, 64, 128",
             "num_samples": 30,
@@ -182,10 +183,10 @@ def main():
         # Get best trial
         best_trial = analysis.best_trial
 
-        best_config_path = "best_model_config.txt"
+        best_config_path = "best_enhanced_model_config.txt"
         with open(best_config_path, 'w') as f:
-            f.write("Best Model Configuration:\n")
-            f.write("=" * 25 + "\n\n")
+            f.write("Best Enhanced Model Configuration:\n")
+            f.write("=" * 30 + "\n\n")
             for param, value in best_trial.config.items():
                 f.write(f"{param}: {value}\n")
             f.write(f"\nBest Mean Accuracy: {best_trial.last_result['mean_accuracy']:.4f}")
@@ -199,8 +200,8 @@ def main():
 
         # Log the results dataframe
         results_df = analysis.results_df
-        results_df.to_csv("tune_results.csv")
-        mlflow.log_artifact("tune_results.csv")
+        results_df.to_csv("tune_enhanced_results.csv")
+        mlflow.log_artifact("tune_enhanced_results.csv")
 
         print(f"Best trial config: {best_trial.config}")
         print(f"Best trial mean_accuracy: {best_trial.last_result['mean_accuracy']}")

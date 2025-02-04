@@ -1,8 +1,6 @@
-import os
 import subprocess
 import time
 import socket
-from pathlib import Path
 
 
 class MLflowServer:
@@ -17,6 +15,7 @@ class MLflowServer:
     def _is_port_in_use(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             return s.connect_ex((self.host, self.port)) == 0
+
 
     def start(self):
         """Start MLflow server"""

@@ -49,7 +49,7 @@ class ResNetECG(nn.Module):
         self.fc = nn.Linear(256, num_classes)
 
     def forward(self, x):
-        x = x.unsqueeze(1)  # Add channel dimension
+        x = x.unsqueeze(1)
 
         x = self.conv1(x)
         x = self.bn1(x)
